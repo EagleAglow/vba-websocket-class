@@ -22,11 +22,11 @@ Private pOutgoingMessageBinary() As Byte
 Private pLastReceivedMessageUTF8 As String
 Private pLastReceivedMessageBinary() As Byte
 
-Private hSessionHandle As Long
-Private hConnectionHandle As Long
-Private hRequestHandle As Long
-Private hWebSocketHandle As Long
-Private fStatus As Long
+Private hSessionHandle As LongPtr
+Private hConnectionHandle As LongPtr
+Private hRequestHandle As LongPtr
+Private hWebSocketHandle As LongPtr
+Private fStatus As LongPtr
 
 ' State Property
 Public Property Get State() As String
@@ -390,7 +390,7 @@ usStatus = 0
 ' get correct value in case of change to buffer size
 dwCloseReasonBufferLength = (UBound(rgbCloseReasonBuffer) - LBound(rgbCloseReasonBuffer) + 1)
 dwError = WinHttpWebSocketQueryCloseStatus(hWebSocketHandle, usStatus, _
-             rgbCloseReasonBuffer(0), dwCloseReasonBufferLength, dwCloseReasonLength)
+             rgbCloseReasonBuffer(0), dwCloseReasonBufferLength, CLngPtr(dwCloseReasonLength))
 If (dwError <> ERRORxSUCCESS) Then
   pErrorText = "Websocket close reason request failed"
   If (hWebSocketHandle <> 0) Then
@@ -491,15 +491,15 @@ End If
 
 Dim rgbBuffer() As Byte  ' do it this way, so we can redim it later
 ReDim rgbBuffer(1023) As Byte
-Dim dwBufferLength As Long
+Dim dwBufferLength As LongPtr
 ' get correct value in case of change to buffer size
 dwBufferLength = (UBound(rgbBuffer) - LBound(rgbBuffer) + 1)
 
-Dim pbCurrentBufferPointer As Long
+Dim pbCurrentBufferPointer As LongPtr
 pbCurrentBufferPointer = VarPtr(rgbBuffer(0))
-Dim dwBytesTransferred As Long
+Dim dwBytesTransferred As LongPtr
 dwBytesTransferred = 0
-Dim eBufferType As Long
+Dim eBufferType As LongPtr
 eBufferType = 0
 Dim dwCloseReasonLength As Long
 dwCloseReasonLength = 0
@@ -517,7 +517,7 @@ Do Until (MessageComplete)
     Exit Function
   End If
   ' receive - will hang if no server response
-  dwError = WinHttpWebSocketReceive(hWebSocketHandle, rgbBuffer(0), dwBufferLength, dwBytesTransferred, eBufferType)
+  dwError = WinHttpWebSocketReceive(hWebSocketHandle, rgbBuffer(0), CLng(dwBufferLength), dwBytesTransferred, eBufferType)
   If (dwError <> ERRORxSUCCESS) Then
     pErrorText = "GetMessageUTF8 Error: " & dwError & "/" & GetLastError
     Exit Function
@@ -539,7 +539,7 @@ If (eBufferType <> WINHTTPxWEBxSOCKETxUTF8xMESSAGExBUFFERxTYPE) Then
 End If
 
 ' resize buffer to dwBytesTransferred, then convert buffer into VBA string
-ReDim Preserve rgbBuffer(dwBytesTransferred)
+ReDim Preserve rgbBuffer(CByte(dwBytesTransferred))
 GetMessageUTF8 = Utf8BytesToString(rgbBuffer)
 End Function
 
@@ -572,15 +572,15 @@ End If
 
 Dim otherBuffer() As Byte  ' do it this way, so we can redim it later
 ReDim otherBuffer(1023) As Byte
-Dim dwBufferLength As Long
+Dim dwBufferLength As LongPtr
 ' get correct value in case of change to buffer size
 dwBufferLength = (UBound(otherBuffer) - LBound(otherBuffer) + 1)
 
-Dim pbCurrentBufferPointer As Long
+Dim pbCurrentBufferPointer As LongPtr
 pbCurrentBufferPointer = VarPtr(otherBuffer(0))
-Dim dwBytesTransferred As Long
+Dim dwBytesTransferred As LongPtr
 dwBytesTransferred = 0
-Dim eBufferType As Long
+Dim eBufferType As LongPtr
 eBufferType = 0
 Dim dwCloseReasonLength As Long
 dwCloseReasonLength = 0
@@ -598,7 +598,7 @@ Do Until (MessageComplete)
     Exit Function
   End If
   ' receive - will hang if no server response
-  dwError = WinHttpWebSocketReceive(hWebSocketHandle, otherBuffer(0), dwBufferLength, dwBytesTransferred, eBufferType)
+  dwError = WinHttpWebSocketReceive(hWebSocketHandle, otherBuffer(0), CLng(dwBufferLength), dwBytesTransferred, eBufferType)
   If (dwError <> ERRORxSUCCESS) Then
     pErrorText = "GetMessageUTF8 Error: " & dwError & "/" & GetLastError
     Exit Function
@@ -620,7 +620,7 @@ If (eBufferType <> WINHTTPxWEBxSOCKETxBINARYxMESSAGExBUFFERxTYPE) Then
 End If
 
 ' resize buffer to dwBytesTransferred, then return
-ReDim Preserve otherBuffer(dwBytesTransferred - 1)
+ReDim Preserve otherBuffer(CByte(dwBytesTransferred) - 1)
 GetMessageBinary = otherBuffer
 End Function
 
@@ -665,15 +665,3 @@ Private Sub CleanUpHandles()
     hSessionHandle = 0
   End If
 End Sub
-
-
-
-
-
-
-
-
-
-
-
-

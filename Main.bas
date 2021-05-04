@@ -1,6 +1,12 @@
 Attribute VB_Name = "Main"
 Option Explicit
 
+' Note: synchronous communication - fails if server does not reply
+' ===================================================
+' =  Echo server thanks to: https://websocket.org/  =
+' ===================================================
+
+
 Sub NewMain()
 Dim ws As CWebSocket
 Set ws = New CWebSocket
