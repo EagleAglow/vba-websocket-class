@@ -29,17 +29,22 @@ With ws
   .SendMessageUTF8 (stringMessage)
   Debug.Print "Server string reply: " & .GetMessageUTF8
   
-  ' send binary
-  .SendMessageBinary binaryMessage()
-  ' convert reply
-  Dim stringReply As String
-  Dim bytesReply() As Byte
-  bytesReply = .GetMessageBinary
-  For k = LBound(bytesReply) To UBound(bytesReply)
-    stringReply = stringReply & bytesReply(k)
-  Next
-  Debug.Print "Server binary reply: " & stringReply
-  
+  ' check after receiving each message to see if server wants to quit
+  If .SCC Then ' close connection
+    .Disconnect
+  Else
+    ' send binary
+    .SendMessageBinary binaryMessage()
+    ' convert reply
+    Dim stringReply As String
+    Dim bytesReply() As Byte
+    bytesReply = .GetMessageBinary
+    For k = LBound(bytesReply) To UBound(bytesReply)
+      stringReply = stringReply & bytesReply(k)
+    Next
+    Debug.Print "Server binary reply: " & stringReply
+    ' for this example, at this point, don't care if server wants to quit
+  End If
   .Disconnect
 End With
 Set ws = Nothing

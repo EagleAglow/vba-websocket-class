@@ -10,6 +10,7 @@ Attribute VB_Exposed = False
 Option Explicit
 
 Private pState As Long         ' connection state
+Private pSCC As Boolean        ' flag for "server closed connection"
 Private pServer As String      ' host name
 Private pPort As Long          ' internet port, usually 80 or 443
 Private pPath As String        ' at least "/"
@@ -119,6 +120,10 @@ Public Property Get ConnectionHandle() As String
 ConnectionHandle = hConnectionHandle
 End Property
 
+' pSCC flag Property
+Public Property Get SCC() As Boolean
+SCC = pSCC
+End Property
 
 Public Function Connect()
 If pState <> 1 Then ' only run this while not connected
@@ -523,6 +528,13 @@ Do Until (MessageComplete)
     Exit Function
   End If
   
+  ' check for close message
+  If (eBufferType = WINHTTPxWEBxSOCKETxCLOSExBUFFERxTYPE) Then ' server wants to quit
+    pSCC = True
+    pErrorText = "Server Closed Connection"
+    Exit Function
+  End If
+  
 ' If we receive just part of the message repeat the receive operation.
   pbCurrentBufferPointer = pbCurrentBufferPointer + dwBytesTransferred
   dwBufferLength = dwBufferLength - dwBytesTransferred
@@ -542,8 +554,6 @@ End If
 ReDim Preserve rgbBuffer(CByte(dwBytesTransferred))
 GetMessageUTF8 = Utf8BytesToString(rgbBuffer)
 End Function
-
-
 
 
 Public Function SendMessageBinary(SendThis() As Byte) As Boolean
@@ -604,6 +614,13 @@ Do Until (MessageComplete)
     Exit Function
   End If
   
+  ' check for close message
+  If (eBufferType = WINHTTPxWEBxSOCKETxCLOSExBUFFERxTYPE) Then ' server wants to quit
+    pSCC = True
+    pErrorText = "Server Closed Connection"
+    Exit Function
+  End If
+  
 ' If we receive just part of the message repeat the receive operation.
   pbCurrentBufferPointer = pbCurrentBufferPointer + dwBytesTransferred
   dwBufferLength = dwBufferLength - dwBytesTransferred
@@ -636,6 +653,7 @@ hConnectionHandle = 0
 hRequestHandle = 0
 hWebSocketHandle = 0
 pState = 1 ' not connected
+pSCC = False
 pAgentHeader = "CWebSocket"  ' default
 pServer = ""  ' default, but will cause Connect method to fail
 pPort = 80    ' default
