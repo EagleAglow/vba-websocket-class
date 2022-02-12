@@ -551,7 +551,8 @@ If (eBufferType <> WINHTTPxWEBxSOCKETxUTF8xMESSAGExBUFFERxTYPE) Then
 End If
 
 ' resize buffer to dwBytesTransferred, then convert buffer into VBA string
-ReDim Preserve rgbBuffer(CByte(dwBytesTransferred))
+' ReDim Preserve rgbBuffer(CByte(dwBytesTransferred))
+ReDim Preserve rgbBuffer(CInt(dwBytesTransferred)) ' Git Issue#1
 GetMessageUTF8 = Utf8BytesToString(rgbBuffer)
 End Function
 
@@ -637,7 +638,8 @@ If (eBufferType <> WINHTTPxWEBxSOCKETxBINARYxMESSAGExBUFFERxTYPE) Then
 End If
 
 ' resize buffer to dwBytesTransferred, then return
-ReDim Preserve otherBuffer(CByte(dwBytesTransferred) - 1)
+' ReDim Preserve otherBuffer(CByte(dwBytesTransferred) - 1)
+ReDim Preserve otherBuffer(CInt(dwBytesTransferred)) ' Similar to Git Issue#1
 GetMessageBinary = otherBuffer
 End Function
 
