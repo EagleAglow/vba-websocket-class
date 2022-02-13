@@ -3,7 +3,8 @@ Option Explicit
 
 ' Note: synchronous communication - fails if server does not reply
 ' ===================================================
-' =  Echo server thanks to: https://websocket.org/  =
+' =  Echo server thanks to:
+' =  https://www.lob.com/blog/websocket-org-is-down-here-is-an-alternative
 ' ===================================================
 
 
@@ -23,8 +24,14 @@ For k = 0 To 7
 Next
 
 With ws
-  .Server = "echo.websocket.org"
+'  .Server = "echo.websocket.org" ' no longer active - Sept, 2021
+  ' substitute, see: https://www.lob.com/blog/websocket-org-is-down-here-is-an-alternative
+  ' after connection, server sends message to client, then echoes
+  .Server = "echo.websocket.events"
   .Connect
+  ' echo.websocket.events responds to connection with a message
+  Debug.Print .GetMessageUTF8
+  
   ' send string
   .SendMessageUTF8 (stringMessage)
   Debug.Print "Server string reply: " & .GetMessageUTF8
